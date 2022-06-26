@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -65,8 +68,7 @@ func startMonitor() {
 	fmt.Println("OK. How often? In seconds, please.")
 	fmt.Scanf("%d", &period)
 
-	urls := []string{"https://sci-hub.se/", "http://libgen.rs/", "https://stackoverflow.com/",
-		"https://go.dev/", "https://www.youtube.com/watch?v=5qap5aO4i9A"}
+	urls := readUrlFile()
 	names := []string{"Your scientist friend", "Your libertarian friend", "Your smart freind",
 		"Your lifeguard friend", "Your relaxing friend"}
 
@@ -92,4 +94,30 @@ func urlTest(url string, name string) {
 	} else {
 		fmt.Println(name, "is not OK. Status Code:", resp.StatusCode)
 	}
+}
+
+func readUrlFile() []string {
+	var urls []string
+
+	file, err := os.Open("urls.txt")
+
+	if err != nil {
+		fmt.Println("WARNING! ERROR:", err)
+	}
+
+	reader := bufio.NewReader(file)
+	for {
+		line, err := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
+
+		urls = append(urls, line)
+
+		if err == io.EOF {
+			break
+		}
+
+	}
+
+	file.Close()
+	return urls
 }
